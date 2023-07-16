@@ -1,21 +1,106 @@
+import { useEffect, useState } from "react"
 import "./Home.css"
+import apiFetch from "../../axios/config"
 
 function Home() {
+
+    const [startDate, setStartDate] = useState("")
+    const [endDate, setEndDate] = useState("")
+    const [opTransf, setOpTransf] = useState("")
+
+    const [transferencias, setTransferencias] = useState([])
+    const [value, setValue] = useState()
+    const [valueFilter, setValueFilter] = useState()
+
+    const getValueFilter = async (id, startDate, endDate, opTransf) => {
+        try {
+            let urlValue = `/${id}/somaValor`
+
+            if (startDate) {
+                urlValue += `?startData=${startDate}`
+            }
+
+            if (endDate) {
+                urlValue += `${startDate ? '&' : '?'}endData=${endDate}`
+            }
+
+            if (opTransf) {
+                urlValue += `${startDate || endDate ? '&' : '?'}opTransf=${opTransf}`
+            }
+            const response = await apiFetch.get(urlValue)
+            const data = response.data
+            setValueFilter(data)
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const getValue = async (id) => {
+        try {
+            let urlValue = `/${id}/somaValor`
+
+            const response = await apiFetch.get(urlValue)
+            const data = response.data
+            setValue(data)
+
+        } catch (error) {
+            console.log(error)
+        }
+
+    }
+
+    const getTransferencia = async (id, startDate, endDate, opTransf) => {
+        try {
+            let url = `/${id}`
+
+            if (startDate) {
+                url += `?startData=${startDate}`
+            }
+
+            if (endDate) {
+                url += `${startDate ? '&' : '?'}endData=${endDate}`
+            }
+
+            if (opTransf) {
+                url += `${startDate || endDate ? '&' : '?'}opTransf=${opTransf}`
+            }
+            const response = await apiFetch.get(url)
+            const data = response.data
+            setTransferencias(data.content)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+
+    const handleSubmit = (e) => {
+        e.preventDefault()
+        getTransferencia(1, startDate, endDate, opTransf)
+        getValueFilter(1, startDate, endDate, opTransf)
+    }
+
+    useEffect(() => {
+        getTransferencia(1, startDate, endDate, opTransf)
+        getValue(1)
+        getValueFilter(1, startDate, endDate, opTransf)
+    }, [])
+
     return (
         <div class="container">
-            <form>
+            <form onSubmit={handleSubmit}>
                 <div className="row pt-3">
                     <div className="col-3 me-auto p-3">
                         <label class="form-label fs-5">Data de Início</label>
-                        <input type="datetime-local" class="form-control" />
+                        <input type="datetime-local" class="form-control" onChange={(e) => setStartDate(e.target.value)} />
                     </div>
                     <div className="col-3 me-auto p-3">
                         <label class="form-label fs-5">Data de Fim</label>
-                        <input type="datetime-local" class="form-control" />
+                        <input type="datetime-local" class="form-control" onChange={(e) => setEndDate(e.target.value)} />
                     </div>
                     <div className="col-4 me-auto pt-3 p-1">
                         <label class="form-label fs-5">Nome do operador transacionado</label>
-                        <input type="text" class="form-control" />
+                        <input type="text" class="form-control" onChange={(e) => setOpTransf(e.target.value)} />
                     </div>
                 </div>
                 <div className="d-flex justify-content-end">
@@ -24,12 +109,12 @@ function Home() {
             </form>
 
             <div className="d-flex justify-content-around mb-2 pt-5">
-                <label className="form-label fs-5">Saldo total: R$ 50,00</label>
-                <label className="form-label fs-5">Saldo no período: R$ 50,00</label>
+                <label className="form-label fs-5">Saldo total: R$ {value}</label>
+                <label className="form-label fs-5">Saldo no período: R$ {valueFilter}</label>
             </div>
             <div class="table-responsive">
                 <table class="table align-middle">
-                    <thead className="table-light"> 
+                    <thead className="table-light">
                         <tr>
                             <th scope="col" className="date-column">Data</th>
                             <th scope="col" className="value-column">Valor</th>
@@ -38,30 +123,16 @@ function Home() {
                         </tr>
                     </thead>
                     <tbody class="table-group-divider">
-                        <tr>
-                            <td scope="row">14/02/2019</td>
-                            <td>R$ 30895,46</td>
-                            <td>depósito</td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <td scope="row">12/04/2019</td>
-                            <td>R$ 12,24</td>
-                            <td>Transferência Entrada</td>
-                            <td>Fulano</td>
-                        </tr>
-                        <tr>
-                            <td scope="row">11/06/2020</td>
-                            <td>R$ -500,50</td>
-                            <td>Transferência Saída</td>
-                            <td>Sicrano</td>
-                        </tr>
-                        <tr>
-                            <td scope="row">11/06/2020</td>
-                            <td>R$ -1234,00</td>
-                            <td>Saque</td>
-                            <td></td>
-                        </tr>
+                        {transferencias.length === 0 ? (<tr><td colSpan={4}>Sem Transferencias!</td></tr>) : (
+                            transferencias.map((transferencia) => (
+                                <tr key={transferencia.id}>
+                                    <td scope="row">{transferencia.dataTransferencia}</td>
+                                    <td>{transferencia.valor}</td>
+                                    <td>{transferencia.tipo}</td>
+                                    <td>{transferencia.nomeOperadorTransacao}</td>
+                                </tr>
+                            ))
+                        )}
                     </tbody>
                 </table>
             </div>
