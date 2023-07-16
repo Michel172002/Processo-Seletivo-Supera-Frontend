@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react"
 import "./Home.css"
 import apiFetch from "../../axios/config"
+import { useParams } from "react-router-dom"
 
 function Home() {
+    const { id } = useParams()
 
     const [startDate, setStartDate] = useState("")
     const [endDate, setEndDate] = useState("")
@@ -18,7 +20,7 @@ function Home() {
     const [totalPages, setTotalPages] = useState(0)
     const [pageNumber, setPageNumber] = useState(0)
 
-    const getValueFilter = async (id, startDate, endDate, opTransf) => {
+    const getValueFilter = async (startDate, endDate, opTransf) => {
         try {
             let urlValue = `/${id}/somaValor`
 
@@ -42,7 +44,7 @@ function Home() {
         }
     }
 
-    const getValue = async (id) => {
+    const getValue = async () => {
         try {
             let urlValue = `/${id}/somaValor`
 
@@ -56,7 +58,7 @@ function Home() {
 
     }
 
-    const getTransferencia = async (id, startDate, endDate, opTransf, page) => {
+    const getTransferencia = async (startDate, endDate, opTransf, page) => {
         try {
             let url = `/${id}?page=${page}`;
 
@@ -88,28 +90,28 @@ function Home() {
     const handleSubmit = (e) => {
         e.preventDefault()
         setCurrentPage(0)
-        getTransferencia(1, startDate, endDate, opTransf, 0)
-        getValueFilter(1, startDate, endDate, opTransf)
+        getTransferencia(startDate, endDate, opTransf, 0)
+        getValueFilter(startDate, endDate, opTransf)
     }
 
     const goToPreviousPage = () => {
         if (currentPage > 0) {
             setCurrentPage(currentPage - 1);
-            getTransferencia(1, startDate, endDate, opTransf, currentPage - 1);
+            getTransferencia(startDate, endDate, opTransf, currentPage - 1);
         }
     };
 
     const goToNextPage = () => {
         if (currentPage < totalPages - 1) {
             setCurrentPage(currentPage + 1);
-            getTransferencia(1, startDate, endDate, opTransf, currentPage + 1);
+            getTransferencia(startDate, endDate, opTransf, currentPage + 1);
         }
     };
 
     useEffect(() => {
-        getTransferencia(1, startDate, endDate, opTransf, 0)
-        getValue(1)
-        getValueFilter(1, startDate, endDate, opTransf)
+        getTransferencia(startDate, endDate, opTransf, 0)
+        getValue()
+        getValueFilter(startDate, endDate, opTransf)
     }, [])
 
     return (
