@@ -6,15 +6,15 @@ function Home() {
             <form>
                 <div className="row pt-3">
                     <div className="col-3 me-auto p-3">
-                        <label class="form-label">Data de Início</label>
+                        <label class="form-label fs-5">Data de Início</label>
                         <input type="datetime-local" class="form-control" />
                     </div>
                     <div className="col-3 me-auto p-3">
-                        <label class="form-label">Data de Fim</label>
+                        <label class="form-label fs-5">Data de Fim</label>
                         <input type="datetime-local" class="form-control" />
                     </div>
                     <div className="col-4 me-auto pt-3 p-1">
-                        <label class="form-label ">Nome do operador transacionado</label>
+                        <label class="form-label fs-5">Nome do operador transacionado</label>
                         <input type="text" class="form-control" />
                     </div>
                 </div>
