@@ -2,15 +2,15 @@
     width: 30%;
 }
 
-.type-column, 
-.value-column{
+.type-column,
+.value-column {
     width: 20%;
 }
 
-.date-column{
+.date-column {
     width: 20%;
 }
 
-.page-link{
+.page-link {
     cursor: pointer;
 }
