@@ -12,6 +12,12 @@ function Home() {
     const [value, setValue] = useState()
     const [valueFilter, setValueFilter] = useState()
 
+    const [lastPage, setLastPage] = useState()
+    const [firstPage, setFirstPage] = useState()
+    const [currentPage, setCurrentPage] = useState(0)
+    const [totalPages, setTotalPages] = useState(0)
+    const [pageNumber, setPageNumber] = useState(0)
+
     const getValueFilter = async (id, startDate, endDate, opTransf) => {
         try {
             let urlValue = `/${id}/somaValor`
@@ -50,38 +56,58 @@ function Home() {
 
     }
 
-    const getTransferencia = async (id, startDate, endDate, opTransf) => {
+    const getTransferencia = async (id, startDate, endDate, opTransf, page) => {
         try {
-            let url = `/${id}`
+            let url = `/${id}?page=${page}`;
 
             if (startDate) {
-                url += `?startData=${startDate}`
+                url += `&startData=${startDate}`;
             }
 
             if (endDate) {
-                url += `${startDate ? '&' : '?'}endData=${endDate}`
+                url += `&endData=${endDate}`;
             }
 
             if (opTransf) {
-                url += `${startDate || endDate ? '&' : '?'}opTransf=${opTransf}`
+                url += `&opTransf=${opTransf}`;
             }
-            const response = await apiFetch.get(url)
-            const data = response.data
-            setTransferencias(data.content)
-        } catch (error) {
-            console.log(error)
-        }
-    }
 
+            const response = await apiFetch.get(url);
+            const data = response.data;
+
+            setTransferencias(data.content);
+            setTotalPages(data.totalPages);
+            setPageNumber(data.pageable.pageNumber);
+            setFirstPage(data.first);
+            setLastPage(data.last);
+        } catch (error) {
+            console.log(error);
+        }
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault()
-        getTransferencia(1, startDate, endDate, opTransf)
+        setCurrentPage(0)
+        getTransferencia(1, startDate, endDate, opTransf, 0)
         getValueFilter(1, startDate, endDate, opTransf)
     }
 
+    const goToPreviousPage = () => {
+        if (currentPage > 0) {
+            setCurrentPage(currentPage - 1);
+            getTransferencia(1, startDate, endDate, opTransf, currentPage - 1);
+        }
+    };
+
+    const goToNextPage = () => {
+        if (currentPage < totalPages - 1) {
+            setCurrentPage(currentPage + 1);
+            getTransferencia(1, startDate, endDate, opTransf, currentPage + 1);
+        }
+    };
+
     useEffect(() => {
-        getTransferencia(1, startDate, endDate, opTransf)
+        getTransferencia(1, startDate, endDate, opTransf, 0)
         getValue(1)
         getValueFilter(1, startDate, endDate, opTransf)
     }, [])
@@ -126,8 +152,8 @@ function Home() {
                         {transferencias.length === 0 ? (<tr><td colSpan={4}>Sem Transferencias!</td></tr>) : (
                             transferencias.map((transferencia) => (
                                 <tr key={transferencia.id}>
-                                    <td scope="row">{transferencia.dataTransferencia}</td>
-                                    <td>{transferencia.valor}</td>
+                                    <td scope="row">{new Date(transferencia.dataTransferencia).toLocaleDateString()}</td>
+                                    <td>R$ {transferencia.valor}</td>
                                     <td>{transferencia.tipo}</td>
                                     <td>{transferencia.nomeOperadorTransacao}</td>
                                 </tr>
@@ -138,13 +164,17 @@ function Home() {
             </div>
             <div className="d-flex justify-content-center">
                 <nav aria-label="Page navigation example">
-                    <ul class="pagination">
-                        <li class="page-item"><a class="page-link" href="#">Previous</a></li>
-                        <li class="page-item"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                        <li class="page-item"><a class="page-link" href="#">Next</a></li>
-                    </ul>
+                    {totalPages === 0 ? (null) : (
+                        <ul class="pagination">
+                            {firstPage === true ? null : (
+                                <li class="page-item"><a class="page-link" onClick={goToPreviousPage}>Previous</a></li>
+                            )}
+                            <li class="page-item"><a class="page-link" href="#">{pageNumber + 1}</a></li>
+                            {lastPage === true ? null : (
+                                <li class="page-item"><a class="page-link" onClick={goToNextPage}>Next</a></li>
+                            )}
+                        </ul>
+                    )}
                 </nav>
             </div>
         </div>
