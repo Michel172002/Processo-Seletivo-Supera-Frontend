@@ -1,0 +1,13 @@
+.name-column {
+    width: 30%;
+}
+
+.type-column, 
+.value-column{
+    width: 20%;
+}
+
+.date-column{
+    width: 20%;
+}
+
